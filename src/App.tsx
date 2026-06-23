@@ -185,9 +185,9 @@ export default function App() {
             <div className="form-header">
               <h2>{editingId ? "✏️ Uredi dio" : "➕ Dodaj novi dio"}</h2>
               <p>Upravljaj zalihama auto dijelova</p>
-              {!apiReady && !loading && (
+              {!loading && (
                 <div className="api-warning">
-                  Backend nije dostupan. Ako testirate lokalno, pokrenite `npm run api`. Za javni link, provjerite je li API deployan.
+                  Aplikacija koristi lokalnu pohranu (localStorage). Podaci se ne dijele online.
                 </div>
               )}
             </div>
@@ -272,7 +272,7 @@ export default function App() {
               <button
                 className="btn btn-primary"
                 onClick={editingId ? savePart : addPart}
-                disabled={saving || !apiReady}
+                disabled={saving}
               >
                 {saving ? "Spremanje..." : editingId ? "Spremi promjene" : "Dodaj dio"}
               </button>
@@ -280,7 +280,7 @@ export default function App() {
                 <button
                   className="btn btn-secondary"
                   onClick={clearForm}
-                  disabled={saving || !apiReady}
+                  disabled={saving}
                 >
                   Otkaži
                 </button>
@@ -291,12 +291,9 @@ export default function App() {
 
         {/* INVENTORY SECTION */}
         <section className="inventory-section">
-          <div className="section-header">
+            <div className="section-header">
             <h2>📦 Zaliha ({filteredParts.length})</h2>
             <p>Upravljaj i prati auto dijelove</p>
-            {lastSync && !loading && (
-              <span className="last-sync">Posljednje osvježenje: {lastSync.toLocaleTimeString()}</span>
-            )}
           </div>
 
           {loading ? (
@@ -306,7 +303,7 @@ export default function App() {
           ) : error ? (
             <div className="empty-state">
               <p>{error}</p>
-              <button className="btn btn-primary" onClick={fetchParts}>
+              <button className="btn btn-primary" onClick={loadParts}>
                 Pokušaj ponovno
               </button>
             </div>
@@ -364,18 +361,15 @@ export default function App() {
                         </button>
                         <button
                           className="btn btn-delete"
-                          onClick={async () => {
+                          onClick={() => {
                             setSaving(true);
                             setError(null);
-
                             try {
-                              const response = await fetch(`/api/parts/${part.id}`, {
-                                method: "DELETE",
-                              });
-                              if (!response.ok) throw new Error("Ne mogu obrisati dio.");
-                              await fetchParts();
+                              const updated = parts.filter((p) => p.id !== part.id);
+                              setParts(updated);
+                              localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
                             } catch (err) {
-                              setError("Greška pri brisanju dijela iz zajedničke baze.");
+                              setError("Greška pri brisanju lokalnog dijela.");
                               console.error(err);
                             } finally {
                               setSaving(false);
