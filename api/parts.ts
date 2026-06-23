@@ -8,10 +8,8 @@ export default async function handler(req: any, res: any) {
     }
 
     if (req.method === "POST") {
-      const part = createPart(req.body);
-      const parts = await readParts();
-      const updated = [...parts, part];
-      await writeParts(updated);
+      const body = await req.body;
+      const part = await createPart(body);
       return res.status(201).json(part);
     }
 

@@ -1,4 +1,4 @@
-import { readParts, writeParts } from "../data";
+import { readParts, writeParts, updatePart, deletePart } from "../data";
 
 export default async function handler(req: any, res: any) {
   try {
@@ -10,21 +10,13 @@ export default async function handler(req: any, res: any) {
     if (partIndex === -1) return res.status(404).json({ error: "Part not found" });
 
     if (req.method === "PUT") {
-      const updatedPart = {
-        ...parts[partIndex],
-        ...req.body,
-        qty: Number(req.body.qty),
-        price: Number(req.body.price),
-      };
-      parts[partIndex] = updatedPart;
-      await writeParts(parts);
-      return res.status(200).json(updatedPart);
+      const updated = await updatePart(id, req.body);
+      return res.status(200).json(updated);
     }
 
     if (req.method === "DELETE") {
-      const updated = parts.filter((part) => part.id !== id);
-      await writeParts(updated);
-      return res.status(204).end();
+      await deletePart(id);
+      return res.status(200).json({ ok: true });
     }
 
     return res.status(405).json({ error: "Method not allowed" });
