@@ -131,170 +131,212 @@ export default function App() {
   );
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial" }}>
-      <div style={{ marginBottom: "20px", borderBottom: "2px solid #333", paddingBottom: "15px" }}>
-        <h1 style={{ margin: "0 0 5px 0", fontSize: "24px" }}>Autoline d.o.o., Šije</h1>
-        <p style={{ margin: "0", color: "#666", fontSize: "14px" }}>Auto Parts Inventory Management</p>
-      </div>
-
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-        <button
-          onClick={connectOlx}
-          style={{
-            padding: "10px 18px",
-            background: olxConnected ? "#22c55e" : "#2563eb",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-          }}
-        >
-          {olxConnected ? "OLX Connected" : "Connect to OLX"}
-        </button>
-        {olxConnected && <span style={{ color: "#16a34a", fontWeight: 600 }}>Connected</span>}
-      </div>
-
-      {/* SEARCH */}
-      <input
-        placeholder="Search parts by name, SKU, or catalog number..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        style={{ padding: "8px", marginBottom: "15px", width: "100%", maxWidth: "400px" }}
-      />
-
-      {/* FORM */}
-      <div style={{ marginBottom: "20px" }}>
-        <h3>{editingId ? "Edit part" : "Add new part"}</h3>
-
-        <input
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          style={{ display: "block", marginBottom: "10px", width: "100%", padding: "10px" }}
-        />
-        <input
-          placeholder="SKU"
-          value={sku}
-          onChange={(e) => setSku(e.target.value)}
-          style={{ display: "block", marginBottom: "10px", width: "100%", padding: "10px" }}
-        />
-        <input
-          placeholder="Catalog Number"
-          value={catalogNumber}
-          onChange={(e) => setCatalogNumber(e.target.value)}
-          style={{ display: "block", marginBottom: "10px", width: "100%", padding: "10px" }}
-        />
-        <input
-          placeholder="Qty"
-          value={qty}
-          onChange={(e) => setQty(e.target.value)}
-          style={{ display: "block", marginBottom: "10px", width: "100%", padding: "10px" }}
-        />
-        <input
-          placeholder="Price"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          style={{ display: "block", marginBottom: "10px", width: "100%", padding: "10px" }}
-        />
-        <input
-          placeholder="Location"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          style={{ display: "block", marginBottom: "10px", width: "100%", padding: "10px" }}
-        />
-
-        <label style={{ display: "block", marginBottom: "10px" }}>
-          <input
-            type="checkbox"
-            checked={onPik}
-            onChange={(e) => setOnPik(e.target.checked)}
-            style={{ marginRight: "8px" }}
-          />
-          On PIK
-        </label>
-
-        <label style={{ display: "block", marginBottom: "10px" }}>
-          Image
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                  setImage(event.target?.result as string);
-                };
-                reader.readAsDataURL(file);
-              }
-            }}
-            style={{ display: "block", marginTop: "5px", width: "100%" }}
-          />
-        </label>
-        {image && (
-          <div style={{ marginBottom: "10px" }}>
-            <img
-              src={image}
-              alt="Preview"
-              style={{ maxWidth: "150px", maxHeight: "150px", borderRadius: "5px" }}
-            />
+    <div className="app-container">
+      <header className="app-header">
+        <div className="header-content">
+          <div className="brand">
+            <h1 className="brand-name">🚗 Autoline d.o.o.</h1>
+            <p className="brand-subtitle">Auto Parts Inventory Management</p>
           </div>
-        )}
-
-        <button onClick={editingId ? savePart : addPart} style={{ marginRight: "10px" }}>
-          {editingId ? "Save" : "Add"}
-        </button>
-        {editingId && (
-          <button onClick={clearForm} style={{ background: "#e5e7eb", color: "#111" }}>
-            Cancel
+          <button
+            className={`btn-olx ${olxConnected ? "connected" : ""}`}
+            onClick={connectOlx}
+          >
+            {olxConnected ? "✓ OLX Connected" : "Connect to OLX"}
           </button>
-        )}
-      </div>
+        </div>
+      </header>
 
-      {/* CARDS */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-        gap: "15px",
-        marginBottom: "30px"
-      }}>
-        {filteredParts.map(part => (
-          <div key={part.id} style={{
-            background: "white",
-            padding: "15px",
-            borderRadius: "10px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
-          }}>
-            {part.image && (
-              <img
-                src={part.image}
-                alt={part.name}
-                style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px", marginBottom: "10px" }}
+      <main className="app-main">
+        {/* SEARCH SECTION */}
+        <section className="search-section">
+          <input
+            className="search-input"
+            placeholder="🔍 Search by name, SKU, or catalog number..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </section>
+
+        {/* FORM SECTION */}
+        <section className="form-section">
+          <div className="form-container">
+            <div className="form-header">
+              <h2>{editingId ? "✏️ Edit Part" : "➕ Add New Part"}</h2>
+              <p>Manage your auto parts inventory</p>
+            </div>
+
+            <div className="form-grid">
+              <input
+                className="form-input"
+                placeholder="Part Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
-            )}
-            <h3>{part.name}</h3>
-            <p>SKU: {part.sku}</p>
-            <p>Catalog #: {part.catalogNumber}</p>
-            <p>Location: {part.location}</p>
-            <p>Qty: <b style={{ color: part.qty < 3 ? "red" : "black" }}>{part.qty}</b></p>
-            <p>Price: {part.price} €</p>
-            <p>PIK: {part.onPik ? "YES" : "NO"}</p>
+              <input
+                className="form-input"
+                placeholder="SKU"
+                value={sku}
+                onChange={(e) => setSku(e.target.value)}
+              />
+              <input
+                className="form-input"
+                placeholder="Catalog Number"
+                value={catalogNumber}
+                onChange={(e) => setCatalogNumber(e.target.value)}
+              />
+              <input
+                className="form-input"
+                type="number"
+                placeholder="Quantity"
+                value={qty}
+                onChange={(e) => setQty(e.target.value)}
+              />
+              <input
+                className="form-input"
+                type="number"
+                placeholder="Price (€)"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+              />
+              <input
+                className="form-input"
+                placeholder="Location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
+            </div>
 
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <button onClick={() => startEdit(part)}>Edit</button>
+            <div className="form-row">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={onPik}
+                  onChange={(e) => setOnPik(e.target.checked)}
+                />
+                <span>Available for PIK</span>
+              </label>
+
+              <label className="file-label">
+                📷 Upload Image
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (event) => {
+                        setImage(event.target?.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                />
+              </label>
+            </div>
+
+            {image && (
+              <div className="image-preview">
+                <img src={image} alt="Preview" />
+              </div>
+            )}
+
+            <div className="form-actions">
               <button
-                onClick={() =>
-                  setParts((prev) => prev.filter((p) => p.id !== part.id))
-                }
-                style={{ background: "#f87171", color: "white" }}
+                className="btn btn-primary"
+                onClick={editingId ? savePart : addPart}
               >
-                Delete
+                {editingId ? "Save Changes" : "Add Part"}
               </button>
+              {editingId && (
+                <button
+                  className="btn btn-secondary"
+                  onClick={clearForm}
+                >
+                  Cancel
+                </button>
+              )}
             </div>
           </div>
-        ))}
-      </div>
+        </section>
 
+        {/* INVENTORY SECTION */}
+        <section className="inventory-section">
+          <div className="section-header">
+            <h2>📦 Inventory ({filteredParts.length})</h2>
+            <p>Manage and track your auto parts</p>
+          </div>
+
+          {filteredParts.length === 0 ? (
+            <div className="empty-state">
+              <p>No parts found. Add your first part to get started!</p>
+            </div>
+          ) : (
+            <div className="product-grid">
+              {filteredParts.map(part => (
+                <div key={part.id} className="product-card">
+                  {part.image && (
+                    <div className="product-image">
+                      <img src={part.image} alt={part.name} />
+                    </div>
+                  )}
+                  <div className="product-content">
+                    <div className="product-header">
+                      <h3 className="product-name">{part.name}</h3>
+                      <span className={`stock-badge ${part.qty < 3 ? "low-stock" : "in-stock"}`}>
+                        {part.qty} in stock
+                      </span>
+                    </div>
+                    <div className="product-details">
+                      <div className="detail-row">
+                        <span className="label">SKU:</span>
+                        <span className="value">{part.sku}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="label">Catalog #:</span>
+                        <span className="value">{part.catalogNumber}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="label">Location:</span>
+                        <span className="value">{part.location}</span>
+                      </div>
+                      <div className="detail-row">
+                        <span className="label">PIK:</span>
+                        <span className={`value ${part.onPik ? "pik-yes" : "pik-no"}`}>
+                          {part.onPik ? "✓ YES" : "✗ NO"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="product-footer">
+                      <div className="price-box">
+                        <span className="price-label">Price</span>
+                        <span className="price">{part.price} €</span>
+                      </div>
+                      <div className="button-group">
+                        <button
+                          className="btn btn-edit"
+                          onClick={() => startEdit(part)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="btn btn-delete"
+                          onClick={() =>
+                            setParts((prev) => prev.filter((p) => p.id !== part.id))
+                          }
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
     </div>
   );
 }
