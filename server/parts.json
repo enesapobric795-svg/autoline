@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": 1782210061347,
+    "name": "Test",
+    "vehicleBrand": "Test",
+    "catalogNumber": "T-001",
+    "qty": 1,
+    "price": 1,
+    "location": "A1",
+    "onPik": true,
+    "image": ""
+  }
+]

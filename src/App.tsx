@@ -17,20 +17,27 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [apiReady, setApiReady] = useState(false);
   const [search, setSearch] = useState("");
   const [olxConnected, setOlxConnected] = useState(false);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
 
   const fetchParts = async () => {
     setLoading(true);
     setError(null);
+    setApiReady(false);
 
     try {
       const response = await fetch("/api/parts");
       if (!response.ok) throw new Error("Ne mogu dohvatiti dijelove");
       const data: Part[] = await response.json();
       setParts(data);
+      setApiReady(true);
+      setLastSync(new Date());
     } catch (err) {
-      setError("Greška pri učitavanju podataka iz zajedničke baze.");
+      setError(
+        "Greška pri učitavanju podataka iz zajedničke baze. Ako koristite lokalnu verziju, pokreni backend sa `npm run api`."
+      );
       console.error(err);
     } finally {
       setLoading(false);
@@ -39,6 +46,8 @@ export default function App() {
 
   useEffect(() => {
     fetchParts();
+    const interval = setInterval(fetchParts, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   // FORM STATE (SVE STRING OSIM checkbox)
@@ -190,6 +199,11 @@ export default function App() {
             <div className="form-header">
               <h2>{editingId ? "✏️ Uredi dio" : "➕ Dodaj novi dio"}</h2>
               <p>Upravljaj zalihama auto dijelova</p>
+              {!apiReady && !loading && (
+                <div className="api-warning">
+                  Backend nije dostupan. Ako testirate lokalno, pokrenite `npm run api`. Za javni link, provjerite je li API deployan.
+                </div>
+              )}
             </div>
 
             <div className="form-grid">
@@ -272,7 +286,7 @@ export default function App() {
               <button
                 className="btn btn-primary"
                 onClick={editingId ? savePart : addPart}
-                disabled={saving}
+                disabled={saving || !apiReady}
               >
                 {saving ? "Spremanje..." : editingId ? "Spremi promjene" : "Dodaj dio"}
               </button>
@@ -280,7 +294,7 @@ export default function App() {
                 <button
                   className="btn btn-secondary"
                   onClick={clearForm}
-                  disabled={saving}
+                  disabled={saving || !apiReady}
                 >
                   Otkaži
                 </button>
@@ -294,6 +308,9 @@ export default function App() {
           <div className="section-header">
             <h2>📦 Zaliha ({filteredParts.length})</h2>
             <p>Upravljaj i prati auto dijelove</p>
+            {lastSync && !loading && (
+              <span className="last-sync">Posljednje osvježenje: {lastSync.toLocaleTimeString()}</span>
+            )}
           </div>
 
           {loading ? (
