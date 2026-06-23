@@ -16,7 +16,7 @@ export default function App() {
   const [parts, setParts] = useState<Part[]>([
     {
       id: 1,
-      name: "Brake Pads",
+      name: "Kočione pločice",
       sku: "BP-100",
       catalogNumber: "BP-2024-001",
       qty: 5,
@@ -26,7 +26,7 @@ export default function App() {
     },
     {
       id: 2,
-      name: "Oil Filter",
+      name: "Filter ulja",
       sku: "OF-200",
       catalogNumber: "OF-2024-002",
       qty: 12,
@@ -51,8 +51,8 @@ export default function App() {
   const [editingId, setEditingId] = useState<number | null>(null);
 
   const connectOlx = () => {
-    // Placeholder: replace with real OLX auth flow / backend call
-    console.log("Connect to OLX button clicked");
+    // Privremeno: zamijeni pravim OLX autentifikacijskim tokom / backend pozivom
+    console.log("Kliknuto dugme za povezivanje sa OLX");
     setOlxConnected(true);
   };
 
@@ -136,13 +136,13 @@ export default function App() {
         <div className="header-content">
           <div className="brand">
             <h1 className="brand-name">🚗 Autoline d.o.o.</h1>
-            <p className="brand-subtitle">Auto Parts Inventory Management</p>
+            <p className="brand-subtitle">Upravljanje zalihama auto dijelova</p>
           </div>
           <button
             className={`btn-olx ${olxConnected ? "connected" : ""}`}
             onClick={connectOlx}
           >
-            {olxConnected ? "✓ OLX Connected" : "Connect to OLX"}
+            {olxConnected ? "✓ OLX povezan" : "Poveži se s OLX"}
           </button>
         </div>
       </header>
@@ -152,7 +152,7 @@ export default function App() {
         <section className="search-section">
           <input
             className="search-input"
-            placeholder="🔍 Search by name, SKU, or catalog number..."
+            placeholder="🔍 Pretraži po nazivu, SKU ili katalogu..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -162,14 +162,14 @@ export default function App() {
         <section className="form-section">
           <div className="form-container">
             <div className="form-header">
-              <h2>{editingId ? "✏️ Edit Part" : "➕ Add New Part"}</h2>
-              <p>Manage your auto parts inventory</p>
+              <h2>{editingId ? "✏️ Uredi dio" : "➕ Dodaj novi dio"}</h2>
+              <p>Upravljaj zalihama auto dijelova</p>
             </div>
 
             <div className="form-grid">
               <input
                 className="form-input"
-                placeholder="Part Name"
+                placeholder="Naziv dijela"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
@@ -181,27 +181,27 @@ export default function App() {
               />
               <input
                 className="form-input"
-                placeholder="Catalog Number"
+                placeholder="Kataloški broj"
                 value={catalogNumber}
                 onChange={(e) => setCatalogNumber(e.target.value)}
               />
               <input
                 className="form-input"
                 type="number"
-                placeholder="Quantity"
+                placeholder="Količina"
                 value={qty}
                 onChange={(e) => setQty(e.target.value)}
               />
               <input
                 className="form-input"
                 type="number"
-                placeholder="Price (€)"
+                placeholder="Cijena (€)"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
               />
               <input
                 className="form-input"
-                placeholder="Location"
+                placeholder="Lokacija"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
               />
@@ -214,11 +214,11 @@ export default function App() {
                   checked={onPik}
                   onChange={(e) => setOnPik(e.target.checked)}
                 />
-                <span>Available for PIK</span>
+                <span>Dostupno za PIK</span>
               </label>
 
               <label className="file-label">
-                📷 Upload Image
+                📷 Učitaj sliku
                 <input
                   type="file"
                   accept="image/*"
@@ -238,7 +238,7 @@ export default function App() {
 
             {image && (
               <div className="image-preview">
-                <img src={image} alt="Preview" />
+                <img src={image} alt="Pregled" />
               </div>
             )}
 
@@ -247,14 +247,14 @@ export default function App() {
                 className="btn btn-primary"
                 onClick={editingId ? savePart : addPart}
               >
-                {editingId ? "Save Changes" : "Add Part"}
+                {editingId ? "Spremi promjene" : "Dodaj dio"}
               </button>
               {editingId && (
                 <button
                   className="btn btn-secondary"
                   onClick={clearForm}
                 >
-                  Cancel
+                  Otkaži
                 </button>
               )}
             </div>
@@ -264,13 +264,13 @@ export default function App() {
         {/* INVENTORY SECTION */}
         <section className="inventory-section">
           <div className="section-header">
-            <h2>📦 Inventory ({filteredParts.length})</h2>
-            <p>Manage and track your auto parts</p>
+            <h2>📦 Zaliha ({filteredParts.length})</h2>
+            <p>Upravljaj i prati auto dijelove</p>
           </div>
 
           {filteredParts.length === 0 ? (
             <div className="empty-state">
-              <p>No parts found. Add your first part to get started!</p>
+              <p>Nema pronađenih dijelova. Dodaj prvi dio da počneš!</p>
             </div>
           ) : (
             <div className="product-grid">
@@ -285,7 +285,7 @@ export default function App() {
                     <div className="product-header">
                       <h3 className="product-name">{part.name}</h3>
                       <span className={`stock-badge ${part.qty < 3 ? "low-stock" : "in-stock"}`}>
-                        {part.qty} in stock
+                        {part.qty} na stanju
                       </span>
                     </div>
                     <div className="product-details">
@@ -294,23 +294,23 @@ export default function App() {
                         <span className="value">{part.sku}</span>
                       </div>
                       <div className="detail-row">
-                        <span className="label">Catalog #:</span>
+                        <span className="label">Kataloški br.:</span>
                         <span className="value">{part.catalogNumber}</span>
                       </div>
                       <div className="detail-row">
-                        <span className="label">Location:</span>
+                        <span className="label">Lokacija:</span>
                         <span className="value">{part.location}</span>
                       </div>
                       <div className="detail-row">
                         <span className="label">PIK:</span>
                         <span className={`value ${part.onPik ? "pik-yes" : "pik-no"}`}>
-                          {part.onPik ? "✓ YES" : "✗ NO"}
+                          {part.onPik ? "✓ DA" : "✗ NE"}
                         </span>
                       </div>
                     </div>
                     <div className="product-footer">
                       <div className="price-box">
-                        <span className="price-label">Price</span>
+                        <span className="price-label">Cijena</span>
                         <span className="price">{part.price} €</span>
                       </div>
                       <div className="button-group">
@@ -318,7 +318,7 @@ export default function App() {
                           className="btn btn-edit"
                           onClick={() => startEdit(part)}
                         >
-                          Edit
+                          Uredi
                         </button>
                         <button
                           className="btn btn-delete"
@@ -326,7 +326,7 @@ export default function App() {
                             setParts((prev) => prev.filter((p) => p.id !== part.id))
                           }
                         >
-                          Delete
+                          Obriši
                         </button>
                       </div>
                     </div>
