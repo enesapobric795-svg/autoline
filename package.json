@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "vercel-build": "npm run build",
     "preview": "vite preview",
-    "api": "node server/index.js"
+    "api": "node server/index.js",
+    "migrate": "node scripts/migrate.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",
@@ -18,9 +19,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
-  "scripts": {
-    "migrate": "node scripts/migrate.js"
-  },
+  
   "devDependencies": {
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
