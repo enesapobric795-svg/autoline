@@ -14,40 +14,35 @@ type Part = {
 
 export default function App() {
   const [parts, setParts] = useState<Part[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [apiReady, setApiReady] = useState(false);
   const [search, setSearch] = useState("");
   const [olxConnected, setOlxConnected] = useState(false);
-  const [lastSync, setLastSync] = useState<Date | null>(null);
 
-  const fetchParts = async () => {
-    setLoading(true);
-    setError(null);
-    setApiReady(false);
+  const STORAGE_KEY = "autoline-parts";
 
+  const loadParts = () => {
     try {
-      const response = await fetch("/api/parts");
-      if (!response.ok) throw new Error("Ne mogu dohvatiti dijelove");
-      const data: Part[] = await response.json();
-      setParts(data);
-      setApiReady(true);
-      setLastSync(new Date());
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        setParts(JSON.parse(raw) as Part[]);
+      } else {
+        const initial: Part[] = [
+          { id: 1, name: "Kočione pločice", vehicleBrand: "BMW", catalogNumber: "BP-2024-001", qty: 5, price: 40, location: "A1", onPik: true },
+          { id: 2, name: "Filter ulja", vehicleBrand: "Mercedes", catalogNumber: "OF-2024-002", qty: 12, price: 10, location: "B2", onPik: false },
+        ];
+        setParts(initial);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+      }
     } catch (err) {
-      setError(
-        "Greška pri učitavanju podataka iz zajedničke baze. Ako koristite lokalnu verziju, pokreni backend sa `npm run api`."
-      );
       console.error(err);
-    } finally {
-      setLoading(false);
+      setError("Greška pri učitavanju lokalnih podataka.");
     }
   };
 
   useEffect(() => {
-    fetchParts();
-    const interval = setInterval(fetchParts, 5000);
-    return () => clearInterval(interval);
+    loadParts();
   }, []);
 
   // FORM STATE (SVE STRING OSIM checkbox)
@@ -84,29 +79,25 @@ export default function App() {
 
     setSaving(true);
     setError(null);
-
     try {
-      const response = await fetch("/api/parts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          vehicleBrand,
-          catalogNumber,
-          qty: Number(qty),
-          price: Number(price),
-          location,
-          onPik,
-          image,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Ne mogu pohraniti dio.");
-      await fetchParts();
+      const newPart: Part = {
+        id: Date.now(),
+        name,
+        vehicleBrand,
+        catalogNumber,
+        qty: Number(qty),
+        price: Number(price),
+        location,
+        onPik,
+        image,
+      };
+      const updated = [...parts, newPart];
+      setParts(updated);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       clearForm();
     } catch (err) {
-      setError("Greška pri spremanju dijela u zajedničku bazu.");
       console.error(err);
+      setError("Greška pri spremanju lokalnog dijela.");
     } finally {
       setSaving(false);
     }
@@ -117,29 +108,24 @@ export default function App() {
 
     setSaving(true);
     setError(null);
-
     try {
-      const response = await fetch(`/api/parts/${editingId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          vehicleBrand,
-          catalogNumber,
-          qty: Number(qty),
-          price: Number(price),
-          location,
-          onPik,
-          image,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Ne mogu ažurirati dio.");
-      await fetchParts();
+      const updated = parts.map((p) => (p.id === editingId ? {
+        ...p,
+        name,
+        vehicleBrand,
+        catalogNumber,
+        qty: Number(qty),
+        price: Number(price),
+        location,
+        onPik,
+        image,
+      } : p));
+      setParts(updated);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       clearForm();
     } catch (err) {
-      setError("Greška pri ažuriranju dijela u zajedničkoj bazi.");
       console.error(err);
+      setError("Greška pri spremanju lokalne promjene.");
     } finally {
       setSaving(false);
     }
