@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { supabase } from "./lib/supabase";
 
 type Part = {
   id: number;
@@ -22,6 +23,29 @@ export default function App() {
 
   const STORAGE_KEY = "autoline-parts";
 
+  const SUPABASE_ENABLED = Boolean(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+  const fetchParts = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      if (SUPABASE_ENABLED) {
+        const { data, error } = await supabase.from<Part>("parts").select("*").order("id", { ascending: true });
+        if (error) throw error;
+        setParts((data as Part[]) || []);
+      } else {
+        // fallback to local
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) setParts(JSON.parse(raw) as Part[]);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Greška pri učitavanju dijelova.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const loadParts = () => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -43,6 +67,23 @@ export default function App() {
 
   useEffect(() => {
     loadParts();
+    fetchParts();
+    let channel: any | null = null;
+    if (SUPABASE_ENABLED) {
+      channel = supabase
+        .channel("public:parts")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "parts" },
+          () => {
+            fetchParts();
+          }
+        )
+        .subscribe();
+    }
+    return () => {
+      if (channel) channel.unsubscribe();
+    };
   }, []);
 
   // FORM STATE (SVE STRING OSIM checkbox)
@@ -80,24 +121,42 @@ export default function App() {
     setSaving(true);
     setError(null);
     try {
-      const newPart: Part = {
-        id: Date.now(),
-        name,
-        vehicleBrand,
-        catalogNumber,
-        qty: Number(qty),
-        price: Number(price),
-        location,
-        onPik,
-        image,
-      };
-      const updated = [...parts, newPart];
-      setParts(updated);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      if (SUPABASE_ENABLED) {
+        const toInsert = {
+          name,
+          vehicleBrand,
+          catalogNumber,
+          qty: Number(qty),
+          price: Number(price),
+          location,
+          onPik,
+          image,
+        };
+        const { data, error } = await supabase.from("parts").insert(toInsert).select();
+        if (error) throw error;
+        if (data) {
+          setParts((prev) => [...prev, ...(data as Part[])]);
+        }
+      } else {
+        const newPart: Part = {
+          id: Date.now(),
+          name,
+          vehicleBrand,
+          catalogNumber,
+          qty: Number(qty),
+          price: Number(price),
+          location,
+          onPik,
+          image,
+        };
+        const updated = [...parts, newPart];
+        setParts(updated);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      }
       clearForm();
     } catch (err) {
       console.error(err);
-      setError("Greška pri spremanju lokalnog dijela.");
+      setError("Greška pri spremanju dijela.");
     } finally {
       setSaving(false);
     }
@@ -109,23 +168,41 @@ export default function App() {
     setSaving(true);
     setError(null);
     try {
-      const updated = parts.map((p) => (p.id === editingId ? {
-        ...p,
-        name,
-        vehicleBrand,
-        catalogNumber,
-        qty: Number(qty),
-        price: Number(price),
-        location,
-        onPik,
-        image,
-      } : p));
-      setParts(updated);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      if (SUPABASE_ENABLED) {
+        const updates = {
+          name,
+          vehicleBrand,
+          catalogNumber,
+          qty: Number(qty),
+          price: Number(price),
+          location,
+          onPik,
+          image,
+        };
+        const { data, error } = await supabase.from("parts").update(updates).eq("id", editingId).select();
+        if (error) throw error;
+        if (data) {
+          setParts((prev) => prev.map((p) => (p.id === editingId ? (data[0] as Part) : p)));
+        }
+      } else {
+        const updated = parts.map((p) => (p.id === editingId ? {
+          ...p,
+          name,
+          vehicleBrand,
+          catalogNumber,
+          qty: Number(qty),
+          price: Number(price),
+          location,
+          onPik,
+          image,
+        } : p));
+        setParts(updated);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      }
       clearForm();
     } catch (err) {
       console.error(err);
-      setError("Greška pri spremanju lokalne promjene.");
+      setError("Greška pri spremanju promjene.");
     } finally {
       setSaving(false);
     }
