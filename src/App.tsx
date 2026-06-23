@@ -1,9 +1,10 @@
 import { useState } from "react";
+import logo from "./assets/viber_slika_2026-06-23_10-30-42-521.jpg";
 
 type Part = {
   id: number;
   name: string;
-  sku: string;
+  vehicleBrand: string;
   catalogNumber: string;
   qty: number;
   price: number;
@@ -17,7 +18,7 @@ export default function App() {
     {
       id: 1,
       name: "Kočione pločice",
-      sku: "BP-100",
+      vehicleBrand: "BMW",
       catalogNumber: "BP-2024-001",
       qty: 5,
       price: 40,
@@ -27,7 +28,7 @@ export default function App() {
     {
       id: 2,
       name: "Filter ulja",
-      sku: "OF-200",
+      vehicleBrand: "Mercedes",
       catalogNumber: "OF-2024-002",
       qty: 12,
       price: 10,
@@ -41,7 +42,7 @@ export default function App() {
 
   // FORM STATE (SVE STRING OSIM checkbox)
   const [name, setName] = useState("");
-  const [sku, setSku] = useState("");
+  const [vehicleBrand, setVehicleBrand] = useState("");
   const [catalogNumber, setCatalogNumber] = useState("");
   const [qty, setQty] = useState("");
   const [price, setPrice] = useState("");
@@ -58,7 +59,7 @@ export default function App() {
 
   const clearForm = () => {
     setName("");
-    setSku("");
+    setVehicleBrand("");
     setCatalogNumber("");
     setQty("");
     setPrice("");
@@ -69,12 +70,12 @@ export default function App() {
   };
 
   const addPart = () => {
-    if (!name || !sku || !catalogNumber || !qty || !price) return;
+    if (!name || !vehicleBrand || !catalogNumber || !qty || !price) return;
 
     const newPart: Part = {
       id: Date.now(),
       name,
-      sku,
+      vehicleBrand,
       catalogNumber,
       qty: Number(qty),
       price: Number(price),
@@ -88,7 +89,7 @@ export default function App() {
   };
 
   const savePart = () => {
-    if (editingId === null || !name || !sku || !catalogNumber || !qty || !price) return;
+    if (editingId === null || !name || !vehicleBrand || !catalogNumber || !qty || !price) return;
 
     setParts((prev) =>
       prev.map((part) =>
@@ -96,7 +97,7 @@ export default function App() {
           ? {
               ...part,
               name,
-              sku,
+              vehicleBrand,
               catalogNumber,
               qty: Number(qty),
               price: Number(price),
@@ -114,7 +115,7 @@ export default function App() {
   const startEdit = (part: Part) => {
     setEditingId(part.id);
     setName(part.name);
-    setSku(part.sku);
+    setVehicleBrand(part.vehicleBrand);
     setCatalogNumber(part.catalogNumber);
     setQty(String(part.qty));
     setPrice(String(part.price));
@@ -126,7 +127,7 @@ export default function App() {
   const filteredParts = parts.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.sku.toLowerCase().includes(search.toLowerCase()) ||
+      p.vehicleBrand.toLowerCase().includes(search.toLowerCase()) ||
       p.catalogNumber.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -135,6 +136,7 @@ export default function App() {
       <header className="app-header">
         <div className="header-content">
           <div className="brand">
+            <img src={logo} alt="Autoline Logo" className="brand-logo" />
             <h1 className="brand-name">🚗 Autoline d.o.o.</h1>
             <p className="brand-subtitle">Upravljanje zalihama auto dijelova</p>
           </div>
@@ -152,7 +154,7 @@ export default function App() {
         <section className="search-section">
           <input
             className="search-input"
-            placeholder="🔍 Pretraži po nazivu, SKU ili katalogu..."
+            placeholder="🔍 Pretraži po nazivu, marki vozila ili katalogu..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -175,9 +177,9 @@ export default function App() {
               />
               <input
                 className="form-input"
-                placeholder="SKU"
-                value={sku}
-                onChange={(e) => setSku(e.target.value)}
+                placeholder="Marka vozila"
+                value={vehicleBrand}
+                onChange={(e) => setVehicleBrand(e.target.value)}
               />
               <input
                 className="form-input"
@@ -290,8 +292,8 @@ export default function App() {
                     </div>
                     <div className="product-details">
                       <div className="detail-row">
-                        <span className="label">SKU:</span>
-                        <span className="value">{part.sku}</span>
+                        <span className="label">Marka:</span>
+                        <span className="value">{part.vehicleBrand}</span>
                       </div>
                       <div className="detail-row">
                         <span className="label">Kataloški br.:</span>

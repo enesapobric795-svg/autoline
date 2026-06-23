@@ -80,6 +80,16 @@ textarea {
   gap: 0.5rem;
 }
 
+.brand-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem;
+}
+
 .brand-name {
   margin: 0;
   font-size: 1.8rem;
