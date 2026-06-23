@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Part = {
   id: number;
@@ -13,31 +13,33 @@ type Part = {
 };
 
 export default function App() {
-  const [parts, setParts] = useState<Part[]>([
-    {
-      id: 1,
-      name: "Kočione pločice",
-      vehicleBrand: "BMW",
-      catalogNumber: "BP-2024-001",
-      qty: 5,
-      price: 40,
-      location: "A1",
-      onPik: true,
-    },
-    {
-      id: 2,
-      name: "Filter ulja",
-      vehicleBrand: "Mercedes",
-      catalogNumber: "OF-2024-002",
-      qty: 12,
-      price: 10,
-      location: "B2",
-      onPik: false,
-    },
-  ]);
-
+  const [parts, setParts] = useState<Part[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [olxConnected, setOlxConnected] = useState(false);
+
+  const fetchParts = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/parts");
+      if (!response.ok) throw new Error("Ne mogu dohvatiti dijelove");
+      const data: Part[] = await response.json();
+      setParts(data);
+    } catch (err) {
+      setError("Greška pri učitavanju podataka iz zajedničke baze.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchParts();
+  }, []);
 
   // FORM STATE (SVE STRING OSIM checkbox)
   const [name, setName] = useState("");
@@ -68,47 +70,70 @@ export default function App() {
     setEditingId(null);
   };
 
-  const addPart = () => {
+  const addPart = async () => {
     if (!name || !vehicleBrand || !catalogNumber || !qty || !price) return;
 
-    const newPart: Part = {
-      id: Date.now(),
-      name,
-      vehicleBrand,
-      catalogNumber,
-      qty: Number(qty),
-      price: Number(price),
-      location,
-      onPik,
-      image,
-    };
+    setSaving(true);
+    setError(null);
 
-    setParts((prev) => [...prev, newPart]);
-    clearForm();
+    try {
+      const response = await fetch("/api/parts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          vehicleBrand,
+          catalogNumber,
+          qty: Number(qty),
+          price: Number(price),
+          location,
+          onPik,
+          image,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Ne mogu pohraniti dio.");
+      await fetchParts();
+      clearForm();
+    } catch (err) {
+      setError("Greška pri spremanju dijela u zajedničku bazu.");
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const savePart = () => {
+  const savePart = async () => {
     if (editingId === null || !name || !vehicleBrand || !catalogNumber || !qty || !price) return;
 
-    setParts((prev) =>
-      prev.map((part) =>
-        part.id === editingId
-          ? {
-              ...part,
-              name,
-              vehicleBrand,
-              catalogNumber,
-              qty: Number(qty),
-              price: Number(price),
-              location,
-              onPik,
-              image,
-            }
-          : part
-      )
-    );
+    setSaving(true);
+    setError(null);
 
-    clearForm();
+    try {
+      const response = await fetch(`/api/parts/${editingId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          vehicleBrand,
+          catalogNumber,
+          qty: Number(qty),
+          price: Number(price),
+          location,
+          onPik,
+          image,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Ne mogu ažurirati dio.");
+      await fetchParts();
+      clearForm();
+    } catch (err) {
+      setError("Greška pri ažuriranju dijela u zajedničkoj bazi.");
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const startEdit = (part: Part) => {
@@ -247,13 +272,15 @@ export default function App() {
               <button
                 className="btn btn-primary"
                 onClick={editingId ? savePart : addPart}
+                disabled={saving}
               >
-                {editingId ? "Spremi promjene" : "Dodaj dio"}
+                {saving ? "Spremanje..." : editingId ? "Spremi promjene" : "Dodaj dio"}
               </button>
               {editingId && (
                 <button
                   className="btn btn-secondary"
                   onClick={clearForm}
+                  disabled={saving}
                 >
                   Otkaži
                 </button>
@@ -269,7 +296,18 @@ export default function App() {
             <p>Upravljaj i prati auto dijelove</p>
           </div>
 
-          {filteredParts.length === 0 ? (
+          {loading ? (
+            <div className="empty-state">
+              <p>Učitavanje zajedničke baze...</p>
+            </div>
+          ) : error ? (
+            <div className="empty-state">
+              <p>{error}</p>
+              <button className="btn btn-primary" onClick={fetchParts}>
+                Pokušaj ponovno
+              </button>
+            </div>
+          ) : filteredParts.length === 0 ? (
             <div className="empty-state">
               <p>Nema pronađenih dijelova. Dodaj prvi dio da počneš!</p>
             </div>
@@ -323,9 +361,23 @@ export default function App() {
                         </button>
                         <button
                           className="btn btn-delete"
-                          onClick={() =>
-                            setParts((prev) => prev.filter((p) => p.id !== part.id))
-                          }
+                          onClick={async () => {
+                            setSaving(true);
+                            setError(null);
+
+                            try {
+                              const response = await fetch(`/api/parts/${part.id}`, {
+                                method: "DELETE",
+                              });
+                              if (!response.ok) throw new Error("Ne mogu obrisati dio.");
+                              await fetchParts();
+                            } catch (err) {
+                              setError("Greška pri brisanju dijela iz zajedničke baze.");
+                              console.error(err);
+                            } finally {
+                              setSaving(false);
+                            }
+                          }}
                         >
                           Obriši
                         </button>
