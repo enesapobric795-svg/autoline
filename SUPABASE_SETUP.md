@@ -15,6 +15,17 @@
      - `SUPABASE_URL` = your Supabase URL
      - `SUPABASE_KEY` = your Service Role key
 
+5. (Optional) Run automated migration
+   - Copy the Supabase Postgres connection string (Settings → Database → Connection string) into an environment variable named `DATABASE_URL`.
+   - Locally, run:
+
+```
+npm install
+npm run migrate
+```
+
+   - This runs `db/create_parts.sql` against your Supabase Postgres instance and creates the `parts` table.
+
 5. Local development (optional)
    - The app has a local-file fallback. If you don't set `SUPABASE_URL`/`SUPABASE_KEY`, the API will use `server/parts.json`.
    - To test with Supabase locally, create a `.env.local` with the same vars.
