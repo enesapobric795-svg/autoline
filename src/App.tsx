@@ -135,7 +135,7 @@ export default function App() {
       <header className="app-header">
         <div className="header-content">
           <div className="brand">
-            <img src="/viber_slika_2026-06-23_10-30-42-521.jpg" alt="Autoline Logo" className="brand-logo" />
+            <img src="/viber_slika_2026-06-23_10-30-42-521.png" alt="Autoline Logo" className="brand-logo" />
             <h1 className="brand-name">🚗 Autoline d.o.o.</h1>
             <p className="brand-subtitle">Upravljanje zalihama auto dijelova</p>
           </div>
