@@ -589,15 +589,6 @@ textarea {
     gap: 1rem;
   }
 }
-  border: none;
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.button-primary {
-  background: #4338ca;
-  color: white;
-}
 
 .button-secondary {
   background: white;
